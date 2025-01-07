@@ -1,21 +1,25 @@
-from pyfirmata import Arduino
+import pyfirmata
 import FunctionBackLog as fbl
-from time import sleep
+import time
+
 # Establish a connection to the Arduino board
-arduino = Arduino('COM5')
+arduino = pyfirmata.Arduino('COM5')
 
-lcd = fbl.LCDscherm(arduino)
+entryButtonPin = arduino.get_pin('d:2:i')
+exitButtonPin = arduino.get_pin('d:3:i')
 
-# Define the string to print
-test = "test"
+# Start an iterator thread to avoid buffer overflow
+it = pyfirmata.util.Iterator(arduino)
+it.start()
 
-lcd.write(0,test)
-lcd.write(1,test)
+lcd = fbl.lCDscreen(arduino)
 
-# Close the connection to the board
-arduino.exit()
+queue = fbl.QueueSystem(entryButtonPin, exitButtonPin, lcd)
 
-class Main:
-    def __init__(self,arduino_port,):
-        self._arduinoport = arduino_port
-        
+
+
+while True:
+    queue.CheckButtonsAndUpdateQueue()
+    time.sleep(.1) 
+
+arduino.exit() 
