@@ -16,6 +16,7 @@ startLedPin = arduino.get_pin('d:8:o')
 it = pyfirmata.util.Iterator(arduino)
 it.start()
 
+maxQueue = 90
 # start led aan
 startLedPin.write(1)
 
@@ -23,7 +24,7 @@ startLedPin.write(1)
 lcd = fbl.lCDscreen(arduino)
 
 # queue aanmaken
-queue = fbl.QueueSystem(entryButtonPin, exitButtonPin, lcd)
+queue = fbl.QueueSystem(entryButtonPin, exitButtonPin, lcd,maxQueue)
   
 # main loop
 while True:

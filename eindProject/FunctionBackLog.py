@@ -95,7 +95,7 @@ class QueuingTheory:
 # CheckButtonsAndUpdateQueue() kijkt of de buttons zijn ingedrukt en update de wachtrij
 
 class QueueSystem:
-    def __init__(self, entry_button_pin, exit_button_pin, lcd_display, max_people_in_queue=90,I=1,m=1):
+    def __init__(self, entry_button_pin, exit_button_pin, lcd_display, max_people_in_queue,I=1,m=1):
         self.people_in_queue = 0
         self.max_people_in_queue = max_people_in_queue
         self.entry_button_pin = entry_button_pin
