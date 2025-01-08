@@ -1,2 +1,2 @@
 # Arduino-Projects
-Arduino projects for school
+Arduino project for school
