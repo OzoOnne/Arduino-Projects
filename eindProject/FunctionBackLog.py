@@ -21,21 +21,62 @@ class lCDscreen:
 
         self.arduino.send_sysex(LCD_PRINT, message_bytes)
 
+# Dit is een class die doormiddel van de wachtrij theorie de wachttijd berekent
 
-    # Clear the LCD
-    # arduino.send_sysex(LCD_CLEAR, [])
+# I: aankomstsnelheid
+# m: verwerkingssnelheid
+# T: totale tijd
+# W: wachttijd in de wachtrij
+# S: servicetijd
+# N: aantal personen in het systeem
+# g: bezettingsgraad
+class QueuingTheory:
+    def __init__(self, I, m):
+        self.I = I  
+        self.m = m  
+        self.people_in_queue = 0
+        self.W = 0  # Initialize W
+        self.update_wachttijd()
+
+    def add_person(self):
+        self.people_in_queue += 1
+        self.update_wachttijd()
+
+    def remove_person(self):
+        if self.people_in_queue > 0:
+            self.people_in_queue -= 1
+        self.update_wachttijd()
+
+    def update_wachttijd(self):
+        if self.m == 0:
+            raise ValueError("Verwerkings snelheid mag niet 0 zijn.")
+        
+        
+        g = self.I/self.m # G = I / M
+        
+        T = self.people_in_queue / self.I # T = N / I
+        S = 1 / self.m # S = 1 / M
+        self.W = T - S # W = T - S
+        
+
+    def wachttijd(self):
+        return self.W
+
+#queuesystem class
 class QueueSystem:
-    def __init__(self, entry_button_pin, exit_button_pin, lcd_display, max_people_in_queue=90):
+    def __init__(self, entry_button_pin, exit_button_pin, lcd_display, max_people_in_queue=90,I=1,m=1):
         self.people_in_queue = 0
         self.max_people_in_queue = max_people_in_queue
         self.entry_button_pin = entry_button_pin
         self.exit_button_pin = exit_button_pin
         self.lcd = lcd_display
+        self.queuing_theory = QueuingTheory(I, m)
         self.updateDisplay()
 
     def updateDisplay(self):
         self.lcd.clear()
         self.lcd.write(0, f"Mensen in rij {self.people_in_queue}")
+        self.lcd.write(1, f"Wachttijd: {self.queuing_theory.wachttijd():.2f} min")
 
     def AddPeopleToQueue(self):
         if self.people_in_queue >= self.max_people_in_queue:
@@ -45,6 +86,7 @@ class QueueSystem:
             self.lcd.write(1, "kom later terug")
         else:
             self.people_in_queue += 1
+            self.queuing_theory.add_person()
             self.updateDisplay()
 
     def RemovePeopleFromQueue(self):
@@ -53,6 +95,7 @@ class QueueSystem:
             self.updateDisplay()
         else:
             self.people_in_queue -= 1
+            self.queuing_theory.remove_person()
             self.updateDisplay()
 
     def isEntryButtonPressed(self):
@@ -73,3 +116,5 @@ class QueueSystem:
             self.RemovePeopleFromQueue()
             while self.isExitButtonPressed():
                 time.sleep(0.1)
+
+
