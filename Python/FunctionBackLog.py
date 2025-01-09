@@ -107,7 +107,6 @@ class QueueSystem:
     def updateDisplay(self):
         self.lcd.clear()
         self.lcd.write(0, f"Mensen in rij {self.people_in_queue}")
-        self.lcd.write(1, f"Wachttijd: {self.queuing_theory.wachttijd():.2f} min")
 
     def AddPeopleToQueue(self):
         if self.people_in_queue >= self.max_people_in_queue:
@@ -115,9 +114,20 @@ class QueueSystem:
             self.lcd.clear()
             self.lcd.write(0, "Rij is vol!!")
             self.lcd.write(1, "kom later terug")
+            print(f"Wachttijd: {self.queuing_theory.wachttijd():.2f} min")
+
+        elif self.people_in_queue >= self.max_people_in_queue * 0.6 and self.people_in_queue < self.max_people_in_queue:
+            self.people_in_queue += 1
+            self.queuing_theory.add_person()
+            self.lcd.clear()
+            self.lcd.write(0, f"Mensen in rij {self.people_in_queue}")
+            self.lcd.write(1, "Rij is bijna vol!!")
+            print(f"Wachttijd: {self.queuing_theory.wachttijd():.2f} min")
+            
         else:
             self.people_in_queue += 1
             self.queuing_theory.add_person()
+            print(f"Wachttijd: {self.queuing_theory.wachttijd():.2f} min")
             self.updateDisplay()
 
     def RemovePeopleFromQueue(self):

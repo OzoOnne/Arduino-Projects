@@ -16,7 +16,9 @@ startLedPin = arduino.get_pin('d:8:o')
 it = pyfirmata.util.Iterator(arduino)
 it.start()
 
+#maximale queue lengte
 maxQueue = 90
+
 # start led aan
 startLedPin.write(1)
 
