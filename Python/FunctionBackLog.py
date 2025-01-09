@@ -43,11 +43,12 @@ class lCDscreen:
 # update_wachttijd() berekent de wachttijd door de formule W = T - S
 # wachttijd() geeft de wachttijd terug
 class QueuingTheory:
-    def __init__(self, I, m,):
+    def __init__(self, I, m, errorLedPin):
         self.I = I  
         self.m = m  
         self.people_in_queue = 0
         self.W = 0  
+        self.errorLedPin = errorLedPin
         self.update_wachttijd()
 
     def add_person(self):
@@ -61,7 +62,9 @@ class QueuingTheory:
 
     def update_wachttijd(self):
         if self.m == 0:
-            raise ValueError("Verwerkings snelheid mag niet 0 zijn.")
+            self.errorLedPin.write(1)
+            print("Error: m kan niet 0 zijn")
+            return
         
         g = self.I/self.m  # G = I / M
         
@@ -95,13 +98,14 @@ class QueuingTheory:
 # CheckButtonsAndUpdateQueue() kijkt of de buttons zijn ingedrukt en update de wachtrij
 
 class QueueSystem:
-    def __init__(self, entry_button_pin, exit_button_pin, lcd_display, max_people_in_queue,I=1,m=1):
+    def __init__(self, entry_button_pin, exit_button_pin, lcd_display, max_people_in_queue, errorLedPin,I=1,m=1):
         self.people_in_queue = 0
         self.max_people_in_queue = max_people_in_queue
         self.entry_button_pin = entry_button_pin
         self.exit_button_pin = exit_button_pin
         self.lcd = lcd_display
-        self.queuing_theory = QueuingTheory(I, m)
+        self.errorLedPin = errorLedPin
+        self.queuing_theory = QueuingTheory(I, m, errorLedPin)
         self.updateDisplay()
 
     def updateDisplay(self):
@@ -114,7 +118,9 @@ class QueueSystem:
             self.lcd.clear()
             self.lcd.write(0, "Rij is vol!!")
             self.lcd.write(1, "kom later terug")
+            print("rij is vol")
             print(f"Wachttijd: {self.queuing_theory.wachttijd():.2f} min")
+            self.errorLedPin.write(1)
 
         elif self.people_in_queue >= self.max_people_in_queue * 0.6 and self.people_in_queue < self.max_people_in_queue:
             self.people_in_queue += 1
@@ -122,7 +128,13 @@ class QueueSystem:
             self.lcd.clear()
             self.lcd.write(0, f"Mensen in rij {self.people_in_queue}")
             self.lcd.write(1, "Rij is bijna vol!!")
+            print("rij is bijna vol")
             print(f"Wachttijd: {self.queuing_theory.wachttijd():.2f} min")
+        
+        elif self.people_in_queue < 0:
+            self.people_in_queue = 0
+            self.updateDisplay()
+            self.errorLedPin.write(1)
             
         else:
             self.people_in_queue += 1

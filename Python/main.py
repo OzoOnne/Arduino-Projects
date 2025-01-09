@@ -17,7 +17,7 @@ it = pyfirmata.util.Iterator(arduino)
 it.start()
 
 #maximale queue lengte
-maxQueue = 90
+maxQueue = 30
 
 # start led aan
 startLedPin.write(1)
