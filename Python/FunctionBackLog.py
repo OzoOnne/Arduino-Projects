@@ -113,7 +113,7 @@ class QueueSystem:
         self.lcd.write(0, f"Mensen in rij {self.people_in_queue}")
 
     def AddPeopleToQueue(self):
-        if self.people_in_queue >= self.max_people_in_queue:
+        if self.people_in_queue >= self.max_people_in_queue-1:
             self.people_in_queue = self.max_people_in_queue
             self.lcd.clear()
             self.lcd.write(0, "Rij is vol!!")
@@ -130,25 +130,26 @@ class QueueSystem:
             self.lcd.write(1, "Rij is bijna vol!!")
             print("rij is bijna vol")
             print(f"Wachttijd: {self.queuing_theory.wachttijd():.2f} min")
-        
-        elif self.people_in_queue < 0:
-            self.people_in_queue = 0
-            self.updateDisplay()
-            self.errorLedPin.write(1)
+            
             
         else:
             self.people_in_queue += 1
             self.queuing_theory.add_person()
             print(f"Wachttijd: {self.queuing_theory.wachttijd():.2f} min")
+            self.errorLedPin.write(0)
             self.updateDisplay()
 
     def RemovePeopleFromQueue(self):
-        if self.people_in_queue <= 0:
+        if self.people_in_queue <= 1:
             self.people_in_queue = 0
+            self.queuing_theory.remove_person()
             self.updateDisplay()
+            print("Er zijn geen mensen in de rij")
+            self.errorLedPin.write(1)
         else:
             self.people_in_queue -= 1
             self.queuing_theory.remove_person()
+            self.errorLedPin.write(0)
             self.updateDisplay()
 
     def isEntryButtonPressed(self):
@@ -162,6 +163,7 @@ class QueueSystem:
     def CheckButtonsAndUpdateQueue(self):
         entry_pressed = self.isEntryButtonPressed()
         exit_pressed = self.isExitButtonPressed()
+
 
         if entry_pressed and exit_pressed:
             # beide knoppen ingedrukt
